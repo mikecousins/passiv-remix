@@ -1,42 +1,55 @@
+import { useForm } from '@conform-to/react';
+import { parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
-import { Form } from '@remix-run/react';
+import { Form, useActionData } from '@remix-run/react';
+import { z } from 'zod';
 import { authenticator } from '~/services/auth.server';
 
-// First we create our UI with the form doing a POST and the inputs with the
-// names we are going to use in the strategy
-export default function Screen() {
-  return (
-    <Form method="post">
-      <input type="email" name="email" required />
-      <input
-        type="password"
-        name="password"
-        autoComplete="current-password"
-        required
-      />
-      <button>Sign In</button>
-    </Form>
-  );
+const schema = z.object({
+  email: z.string(),
+  password: z.string(),
+});
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  return await authenticator.isAuthenticated(request, {
+    successRedirect: '/',
+  });
 }
 
-// Second, we need to export an action function, here we will use the
-// `authenticator.authenticate method`
 export async function action({ request }: ActionFunctionArgs) {
-  // we call the method with the name of the strategy we want to use and the
-  // request object, optionally we pass an object with the URLs we want the user
-  // to be redirected to after a success or a failure
+  const formData = await request.formData();
+  const submission = parseWithZod(formData, { schema });
+
+  // Send the submission back to the client if the status is not successful
+  if (submission.status !== 'success') {
+    return submission.reply();
+  }
+
   return await authenticator.authenticate('user-pass', request, {
     successRedirect: '/dashboard',
     failureRedirect: '/login',
   });
 }
 
-// Finally, we can export a loader function where we check if the user is
-// authenticated with `authenticator.isAuthenticated` and redirect to the
-// dashboard if it is or return null if it's not
-export async function loader({ request }: LoaderFunctionArgs) {
-  // If the user is already authenticated redirect to /dashboard directly
-  return await authenticator.isAuthenticated(request, {
-    successRedirect: '/dashboard',
+export default function Screen() {
+  const lastResult = useActionData<typeof action>();
+  const [form, fields] = useForm({
+    shouldValidate: 'onBlur',
+    lastResult,
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema });
+    },
   });
+  return (
+    <Form method="post" id={form.id} onSubmit={form.onSubmit}>
+      <input type="email" name={fields.email.name} required />
+      <input
+        type="password"
+        name={fields.password.name}
+        autoComplete="current-password"
+        required
+      />
+      <button>Sign In</button>
+    </Form>
+  );
 }
