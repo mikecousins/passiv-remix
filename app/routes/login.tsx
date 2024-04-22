@@ -1,21 +1,15 @@
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod';
-import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { Form, redirect, useActionData } from '@remix-run/react';
 import { z } from 'zod';
-import { authenticator, passwordLogin } from '~/services/auth.server';
+import { passwordLogin } from '~/services/auth.server';
 import { commitSession, getSession } from '~/services/session.server';
 
 const schema = z.object({
   email: z.string(),
   password: z.string(),
 });
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request, {
-    successRedirect: '/',
-  });
-}
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -41,7 +35,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export default function Screen() {
+export default function LoginPage() {
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm({
     shouldValidate: 'onBlur',
