@@ -4,13 +4,16 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  type MetaFunction,
 } from '@remix-run/react';
-import axios from 'axios';
 
 import '~/tailwind.css';
 
+export const meta: MetaFunction = () => {
+  return [{ title: 'Passiv' }];
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
-  axios.defaults.baseURL = 'https://api.passiv.com/api/v1/';
   return (
     <html lang="en">
       <head>
@@ -19,7 +22,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-zinc-50 font-sans dark:bg-zinc-950 text-zinc-950 dark:text-white">
         {children}
         <ScrollRestoration />
         <Scripts />
