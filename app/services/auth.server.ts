@@ -1,13 +1,24 @@
-// app/services/auth.server.ts
-import { Authenticator } from "remix-auth";
-import { sessionStorage } from "~/services/session.server";
+import axios from 'axios';
 
-type User = {
-  id: string;
-  email: string;
-  role: string;
+type PasswordLoginResponse = {
+  mfa_required: {
+    type: 'OTP_TOKEN';
+    state: string;
+  };
+  token: null;
 };
 
-// Create an instance of the authenticator, pass a generic with what
-// strategies will return and will store in the session
-export const authenticator = new Authenticator<User>(sessionStorage);
+type TokenLoginResponse = {
+  token: string;
+};
+
+export const passwordLogin = (email: string, password: string) => {
+  return axios.post<PasswordLoginResponse>('auth/login', { email, password });
+};
+
+export const tokenLogin = (token: string, twoFactorState: string) => {
+  return axios.put<TokenLoginResponse>('auth/login', {
+    token,
+    state: twoFactorState,
+  });
+};

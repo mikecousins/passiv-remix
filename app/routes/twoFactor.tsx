@@ -3,12 +3,11 @@ import { parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
 import { Form, redirect, useActionData } from '@remix-run/react';
 import { z } from 'zod';
-import { authenticator, passwordLogin } from '~/services/auth.server';
+import { authenticator, tokenLogin } from '~/services/auth.server';
 import { commitSession, getSession } from '~/services/session.server';
 
 const schema = z.object({
-  email: z.string(),
-  password: z.string(),
+  token: z.string(),
 });
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -26,14 +25,14 @@ export async function action({ request }: ActionFunctionArgs) {
     return submission.reply();
   }
 
-  const { email, password } = submission.value;
-  const response = await passwordLogin(email, password);
+  const { token } = submission.value;
+  const session = await getSession(request.headers.get('Cookie'));
+  const response = await tokenLogin(token, session.get('mfa_state'));
   console.log(response.data);
 
-  if (response.data.mfa_required.state) {
-    const session = await getSession(request.headers.get('Cookie'));
-    session.set('mfa_state', response.data.mfa_required.state);
-    return redirect('/twoFactor', {
+  if (response.data.token) {
+    session.set('jwt_token', response.data.token);
+    return redirect('/', {
       headers: {
         'Set-Cookie': await commitSession(session),
       },
@@ -41,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
-export default function Screen() {
+export default function TwoFactorPage() {
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm({
     shouldValidate: 'onBlur',
@@ -52,13 +51,7 @@ export default function Screen() {
   });
   return (
     <Form method="post" id={form.id} onSubmit={form.onSubmit}>
-      <input type="email" name={fields.email.name} required />
-      <input
-        type="password"
-        name={fields.password.name}
-        autoComplete="current-password"
-        required
-      />
+      <input type="token" name={fields.token.name} required />
       <button>Sign In</button>
     </Form>
   );

@@ -5,9 +5,12 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
+import axios from 'axios';
+
 import '~/tailwind.css';
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  axios.defaults.baseURL = 'https://api.passiv.com/api/v1/';
   return (
     <html lang="en">
       <head>
