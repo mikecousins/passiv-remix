@@ -31,7 +31,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const { email, password } = submission.value;
   const response = await passwordLogin(email, password);
-  console.log(response.data);
 
   if (response.data.mfa_required.state) {
     const session = await getSession(request.headers.get('Cookie'));
