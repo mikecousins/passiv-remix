@@ -20,7 +20,7 @@ const schema = z.object({
   password: z.string(),
 });
 
-export async function action({ request }: ActionFunctionArgs) {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema });
 
@@ -42,9 +42,9 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
   }
-}
+};
 
-export default function LoginPage() {
+const LoginPage = () => {
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm({
     shouldValidate: 'onBlur',
@@ -53,6 +53,7 @@ export default function LoginPage() {
       return parseWithZod(formData, { schema });
     },
   });
+
   return (
     <div className="max-w-xl mx-auto py-8">
       <Form method="post" id={form.id} onSubmit={form.onSubmit}>
@@ -78,4 +79,6 @@ export default function LoginPage() {
       </Form>
     </div>
   );
-}
+};
+
+export default LoginPage;

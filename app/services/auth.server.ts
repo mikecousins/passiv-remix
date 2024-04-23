@@ -13,11 +13,11 @@ type TokenLoginResponse = {
 };
 
 export const passwordLogin = (email: string, password: string) => {
-  return axios.post<PasswordLoginResponse>('auth/login', { email, password });
+  return axios.post<PasswordLoginResponse>('https://api.passiv.com/api/v1/auth/login', { email, password });
 };
 
 export const tokenLogin = (token: string, twoFactorState: string) => {
-  return axios.put<TokenLoginResponse>('auth/login', {
+  return axios.put<TokenLoginResponse>('https://api.passiv.com/api/v1/auth/login', {
     token,
     state: twoFactorState,
   });

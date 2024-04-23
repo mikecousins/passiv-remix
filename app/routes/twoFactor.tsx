@@ -3,6 +3,15 @@ import { parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs } from '@remix-run/node';
 import { Form, redirect, useActionData } from '@remix-run/react';
 import { z } from 'zod';
+import { Button } from '~/components/button';
+import {
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+  Legend,
+} from '~/components/fieldset';
+import { Input } from '~/components/input';
 import { tokenLogin } from '~/services/auth.server';
 import { commitSession, getSession } from '~/services/session.server';
 
@@ -10,7 +19,7 @@ const schema = z.object({
   token: z.string(),
 });
 
-export async function action({ request }: ActionFunctionArgs) {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema });
 
@@ -22,7 +31,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const { token } = submission.value;
   const session = await getSession(request.headers.get('Cookie'));
   const response = await tokenLogin(token, session.get('mfa_state'));
-  console.log(response.data);
 
   if (response.data.token) {
     session.set('jwt_token', response.data.token);
@@ -32,9 +40,9 @@ export async function action({ request }: ActionFunctionArgs) {
       },
     });
   }
-}
+};
 
-export default function TwoFactorPage() {
+const TwoFactorPage = () => {
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm({
     shouldValidate: 'onBlur',
@@ -43,10 +51,23 @@ export default function TwoFactorPage() {
       return parseWithZod(formData, { schema });
     },
   });
+
   return (
-    <Form method="post" id={form.id} onSubmit={form.onSubmit}>
-      <input type="token" name={fields.token.name} required />
-      <button>Sign In</button>
-    </Form>
+    <div className="max-w-xl mx-auto py-8">
+      <Form method="post" id={form.id} onSubmit={form.onSubmit}>
+        <Fieldset>
+          <Legend>Two Factor</Legend>
+          <FieldGroup>
+            <Field>
+              <Label>Token</Label>
+              <Input type="token" name={fields.token.name} required />
+            </Field>
+            <Button type="submit">Sign In</Button>
+          </FieldGroup>
+        </Fieldset>
+      </Form>
+    </div>
   );
-}
+};
+
+export default TwoFactorPage;
