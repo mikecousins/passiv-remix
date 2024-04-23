@@ -3,6 +3,15 @@ import { parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs } from '@remix-run/node';
 import { Form, redirect, useActionData } from '@remix-run/react';
 import { z } from 'zod';
+import { Button } from '~/components/button';
+import {
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+  Legend,
+} from '~/components/fieldset';
+import { Input } from '~/components/input';
 import { passwordLogin } from '~/services/auth.server';
 import { commitSession, getSession } from '~/services/session.server';
 
@@ -45,15 +54,28 @@ export default function LoginPage() {
     },
   });
   return (
-    <Form method="post" id={form.id} onSubmit={form.onSubmit}>
-      <input type="email" name={fields.email.name} required />
-      <input
-        type="password"
-        name={fields.password.name}
-        autoComplete="current-password"
-        required
-      />
-      <button>Sign In</button>
-    </Form>
+    <div className="max-w-xl mx-auto py-8">
+      <Form method="post" id={form.id} onSubmit={form.onSubmit}>
+        <Fieldset>
+          <Legend>Login</Legend>
+          <FieldGroup>
+            <Field>
+              <Label>Email</Label>
+              <Input type="email" name={fields.email.name} required />
+            </Field>
+            <Field>
+              <Label>Password</Label>
+              <Input
+                type="password"
+                name={fields.password.name}
+                autoComplete="current-password"
+                required
+              />
+            </Field>
+            <Button type="submit">Sign In</Button>
+          </FieldGroup>
+        </Fieldset>
+      </Form>
+    </div>
   );
 }
