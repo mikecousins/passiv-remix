@@ -1,7 +1,7 @@
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod';
 import type { ActionFunctionArgs } from '@remix-run/node';
-import { Form, redirect, useActionData } from '@remix-run/react';
+import { Form, redirect, useActionData, useNavigation } from '@remix-run/react';
 import { z } from 'zod';
 import { Button } from '~/components/button';
 import {
@@ -44,6 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 const LoginPage = () => {
+  const { state } = useNavigation();
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm({
     shouldValidate: 'onBlur',
@@ -72,7 +73,9 @@ const LoginPage = () => {
                 required
               />
             </Field>
-            <Button type="submit">Sign In</Button>
+            <Button type="submit" disabled={state === 'submitting'}>
+              Sign In
+            </Button>
           </FieldGroup>
         </Fieldset>
       </Form>
