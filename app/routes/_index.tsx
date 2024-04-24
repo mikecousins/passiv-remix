@@ -1,6 +1,7 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { json, redirect, type LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData, type ClientLoaderFunctionArgs } from '@remix-run/react';
 import axios from 'axios';
+import { cacheClientLoader } from 'remix-client-cache';
 import {
   Table,
   TableBody,
@@ -39,6 +40,9 @@ type PortfolioGroupInfo = {
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get('Cookie'));
   const token = session.get('jwt_token');
+  if (!token) {
+    return redirect('/logout');
+  }
   const groups = await axios.get<PortfolioGroup[]>(
     'https://api.passiv.com/api/v1/portfolioGroups',
     {
@@ -74,6 +78,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     totalEquity,
   });
 };
+
+export const clientLoader = (args: ClientLoaderFunctionArgs) =>
+  cacheClientLoader(args);
+clientLoader.hydrate = true;
 
 export default function Index() {
   const { groups, totalEquity } = useLoaderData<typeof loader>();

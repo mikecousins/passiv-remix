@@ -1,6 +1,7 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, type ClientLoaderFunctionArgs } from '@remix-run/react';
 import axios from 'axios';
+import { cacheClientLoader } from 'remix-client-cache';
 import { Strong, Text } from '~/components/text';
 import { getSession } from '~/services/session.server';
 
@@ -66,6 +67,10 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     equity,
   });
 };
+
+export const clientLoader = (args: ClientLoaderFunctionArgs) =>
+  cacheClientLoader(args);
+clientLoader.hydrate = true;
 
 export default function Index() {
   const { name, cash, equity } = useLoaderData<typeof loader>();
