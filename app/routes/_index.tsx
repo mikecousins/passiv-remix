@@ -2,15 +2,8 @@ import { json, redirect, type LoaderFunctionArgs } from '@remix-run/node';
 import { useLoaderData, type ClientLoaderFunctionArgs } from '@remix-run/react';
 import axios from 'axios';
 import { cacheClientLoader } from 'remix-client-cache';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '~/components/table';
-import { Strong, Text } from '~/components/text';
+import Group from '~/components/Group';
+import { Strong } from '~/components/text';
 import { getSession } from '~/services/session.server';
 import { formatCurrency } from '~/utilities/numbers';
 
@@ -88,30 +81,16 @@ export default function Index() {
   const { groups, totalEquity } = useLoaderData<typeof loader>();
   return (
     <div className="container mx-auto max-w-7xl">
-      <h1 className="text-white font-bold text-xl">Passiv</h1>
-      <Text>
-        <Strong>Total Equity:</Strong> {formatCurrency(totalEquity)}
-      </Text>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableHeader>Name</TableHeader>
-            <TableHeader>Accuracy</TableHeader>
-            <TableHeader>Cash</TableHeader>
-            <TableHeader>Equity</TableHeader>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {groups.map((group) => (
-            <TableRow key={group.id} href={`/group/${group.id}`}>
-              <TableCell>{group.name}</TableCell>
-              <TableCell>{Math.round(group.accuracy)}%</TableCell>
-              <TableCell>{formatCurrency(group.cash)}</TableCell>
-              <TableCell>{formatCurrency(group.equity)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <h1 className="text-white font-bold text-4xl mt-4">Passiv</h1>
+      <div className="my-4 text-2xl text-zinc-400 flex">
+        <div className="flex-1">Groups</div>
+        <div>Total Equity: <Strong>{formatCurrency(totalEquity)}</Strong></div>
+      </div>
+      <div className="flex flex-col gap-4">
+        {groups.map((group) => (
+          <Group key={group.id} {...group} />
+        ))}
+      </div>
     </div>
   );
 }
