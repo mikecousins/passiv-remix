@@ -1,11 +1,21 @@
 import { json, type LoaderFunctionArgs } from '@remix-run/node';
-import { useLoaderData, type ClientLoaderFunctionArgs } from '@remix-run/react';
+import {
+  Link,
+  useLoaderData,
+  type ClientLoaderFunctionArgs,
+} from '@remix-run/react';
 import axios from 'axios';
 import { cacheClientLoader } from 'remix-client-cache';
 import { Strong, Text } from '~/components/text';
 import { getSession } from '~/services/session.server';
+import { formatCurrency } from '~/utilities/numbers';
 
 type PortfolioGroup = {
+  id: string;
+  name: string;
+};
+
+type Account = {
   id: string;
   name: string;
 };
@@ -20,6 +30,7 @@ type Position = {
 };
 
 type PortfolioGroupInfo = {
+  accounts: Account[];
   accuracy: number;
   balances: Balance[];
   calculated_trades: {
@@ -59,6 +70,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   response.data.positions.forEach((position) => {
     equity += position.fractional_units * position.price;
   });
+  console.log(response.data);
 
   return json({
     ...response.data,
@@ -73,16 +85,21 @@ export const clientLoader = (args: ClientLoaderFunctionArgs) =>
 clientLoader.hydrate = true;
 
 export default function Index() {
-  const { name, cash, equity } = useLoaderData<typeof loader>();
+  const { name, cash, equity, accounts } = useLoaderData<typeof loader>();
   return (
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-white font-bold text-xl">{name}</h1>
       <Text>
-        <Strong>Total Equity:</Strong> {equity}
+        <Strong>Total Equity:</Strong> {formatCurrency(equity)}
       </Text>
       <Text>
-        <Strong>Total Cash:</Strong> {cash}
+        <Strong>Total Cash:</Strong> {formatCurrency(cash)}
       </Text>
+      {accounts.map((account) => (
+        <Link to={`/account/${account.id}`} key={account.id}>
+          {account.name}
+        </Link>
+      ))}
     </div>
   );
 }

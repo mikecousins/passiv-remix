@@ -12,6 +12,7 @@ import {
 } from '~/components/table';
 import { Strong, Text } from '~/components/text';
 import { getSession } from '~/services/session.server';
+import { formatCurrency } from '~/utilities/numbers';
 
 type PortfolioGroup = {
   id: string;
@@ -89,13 +90,13 @@ export default function Index() {
     <div className="container mx-auto max-w-7xl">
       <h1 className="text-white font-bold text-xl">Passiv</h1>
       <Text>
-        <Strong>Total Equity:</Strong> {totalEquity}
+        <Strong>Total Equity:</Strong> {formatCurrency(totalEquity)}
       </Text>
       <Table>
         <TableHead>
           <TableRow>
             <TableHeader>Name</TableHeader>
-            <TableHeader>Accurace</TableHeader>
+            <TableHeader>Accuracy</TableHeader>
             <TableHeader>Cash</TableHeader>
             <TableHeader>Equity</TableHeader>
           </TableRow>
@@ -104,9 +105,9 @@ export default function Index() {
           {groups.map((group) => (
             <TableRow key={group.id} href={`/group/${group.id}`}>
               <TableCell>{group.name}</TableCell>
-              <TableCell>{group.accuracy}%</TableCell>
-              <TableCell>${group.cash}</TableCell>
-              <TableCell>${group.equity}</TableCell>
+              <TableCell>{Math.round(group.accuracy)}%</TableCell>
+              <TableCell>{formatCurrency(group.cash)}</TableCell>
+              <TableCell>{formatCurrency(group.equity)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
