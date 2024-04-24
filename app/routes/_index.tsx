@@ -80,7 +80,7 @@ clientLoader.hydrate = true;
 export default function Index() {
   const { groups, totalEquity } = useLoaderData<typeof loader>();
   return (
-    <div className="container mx-auto max-w-7xl">
+    <div className="container mx-auto max-w-7xl p-4">
       <h1 className="text-white font-bold text-4xl mt-4">Passiv</h1>
       <div className="my-4 text-2xl text-zinc-400 flex">
         <div className="flex-1">Groups</div>
